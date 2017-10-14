@@ -169,18 +169,23 @@ if __name__ == "__main__":
     df.set_index("UTC", inplace=True)
     df.sort_index(inplace=True)
     # date = str(pd.datetime.utcnow().date())
-    # today = pd.DataFrame(df[(df.Source.isin(sci_sources)) & (df.Line.isin(sci_lines))][date])
+    # today = pd.DataFrame(df[df.Source.isin(sci_sources) &
+    #                         df.Line.isin(sci_lines)][date])
     # print("\n", date, today["Scan duration"].sum())
     # print('Observed: ' + date)
     # print(today.Source.value_counts())
     sci_types = ['CAL', 'ONOFF', 'OTF', 'RASTER']
-    sci = pd.DataFrame(df[df.Source.isin(sci_sources) & df.Line.isin(sci_lines) & df['Scan type'].isin(sci_types)])
+    sci = pd.DataFrame(df[df.Source.isin(sci_sources) &
+                          df.Line.isin(sci_lines) &
+                          df['Scan type'].isin(sci_types)])
     print(sci.groupby(sci.index.date).Source.unique())
-    
+
     # May need to get rid of any cancelled scans
-    sci.to_csv('Betelgeuse_scans.dat', index=False, columns=['Scan'], header=False)
-    
+    sci.to_csv('Betelgeuse_scans.dat', index=False,
+               columns=['Scan'], header=False)
+
     sci['date'] = sci.index.date.astype('str')
     for date in sci.date.unique():
         # print(date)
-	sci[date].to_csv('Betelgeuse_' + str(date) + '_scans.dat', index=False, columns=['Scan'], header=False)
+        sci[date].to_csv('Betelgeuse_' + str(date) + '_scans.dat',
+                         index=False, columns=['Scan'], header=False)
