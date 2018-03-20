@@ -8,6 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import with_statement
 import argparse
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
@@ -159,7 +160,7 @@ def summarise_sciobs(sci_sources, sci_lines, df):
                           ]
                        )
     dfs = dfs.groupby(['source', 'line'])[['scan_duration']].sum()
-    dfs.sort_values('scan_duration', ascending=False, inplace=True)
+    # dfs.sort_values('scan_duration', ascending=False, inplace=True)
     dfs['Duration [min]'] = (dfs['scan_duration'] /
                              np.timedelta64(1, 'm')).round(1)
     return dfs[['Duration [min]']]
@@ -177,6 +178,16 @@ def parse_inputs():
     return args.catalogs, args.obslogs
 
 
+def plot_dfs(dfs):
+    dfs[['Duration [min]']].plot.barh(zorder=2, legend=False)
+    plt.grid(zorder=0)
+    plt.title('Sum of "ON" science source/line scan duration')
+    plt.xlabel('Duration [min]')
+    plt.savefig('apexlog.png', bbox_inches='tight')
+    print('Created plot: ./apexlog.png')
+    return plt.gcf()
+
+
 def main():
     catalogs, obslogs = parse_inputs()
     if (catalogs is None) & (obslogs is None):
@@ -186,12 +197,15 @@ def main():
     sci_lines = read_linecat(catalogs)
     df = read_obslogs(obslogs)
     dfs = summarise_sciobs(sci_sources, sci_lines, df)
+    # print(dfs.sort_values(by='Duration [min]', ascending=False))
+    print(dfs)
+    fig = plot_dfs(dfs)
     return sci_sources, sci_lines, df, dfs
 
 
 if __name__ == '__main__':
     sci_sources, sci_lines, df, dfs = main()
-    print(dfs)
+
     # # date = str(pd.datetime.utcnow().date())
     # # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
     # #                      & (df.Line.isin(sci_lines))][date])
