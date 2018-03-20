@@ -184,7 +184,7 @@ def plot_dfs(dfs):
     plt.title('Sum of "ON" science source/line scan duration')
     plt.xlabel('Duration [min]')
     plt.savefig('apexlog.png', bbox_inches='tight')
-    print('Created plot: ./apexlog.png')
+    print('\nCreated plot: ./apexlog.png')
     return plt.gcf()
 
 
@@ -206,12 +206,17 @@ def main():
 if __name__ == '__main__':
     sci_sources, sci_lines, df, dfs = main()
 
-    # # date = str(pd.datetime.utcnow().date())
-    # # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
-    # #                      & (df.Line.isin(sci_lines))][date])
-    # # print("\n", date, today["Scan duration"].sum())
-    # # print('Observed: ' + date)
-    # # print(today.Source.value_counts())
+    # # Example 1: List science source scans today and sum of on time
+    # df.set_index('utc', inplace=True)
+    # date = str(pd.datetime.utcnow().date())
+    # date = '2016-12-10'
+    # today = pd.DataFrame(df[(df.source.isin(sci_sources))
+    #                         & (df.line.isin(sci_lines))][date])
+    # print("\n", date, today["scan_duration"].sum())
+    # print('Observed: ' + date)
+    # print(today.source.value_counts())
+
+    # # Example 2: List which dates sources have been observed
     # df.set_index('utc', inplace=True)
     # sci = pd.DataFrame(df[(df.source.isin(sci_sources))
     #                       & (df.line.isin(sci_lines))])
