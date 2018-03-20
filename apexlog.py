@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, with_statement,
                         print_function, unicode_literals)
 import pandas as pd
+import re
 
 
 def read_sourcecat(cat=None):
@@ -83,7 +84,7 @@ def read_one(filename):
 
     import pandas as pd
     df = pd.read_html(filename, header=0)[0]
-    df.set_index("Scan")
+    # df.set_index("Scan")
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
     df["Scan duration"] = pd.to_timedelta(df["Scan duration"], unit="s")
     return df
@@ -121,8 +122,13 @@ def read_obslogs(dir=None):
     df = read_one(logs[0])
     for log in logs[1:]:
         df = pd.concat([df, read_one(log)], axis=0)
-    df.sort_index(inplace=True)
     df["Line"] = df["Mol. line"].apply(get_line)
+    df.rename(columns=(lambda x: re.sub('[().]', '', x)), inplace=True)
+    df.rename(columns=(lambda x: re.sub('[ -]', '_', x)), inplace=True)
+    df.rename(columns=(lambda x: x.lower()), inplace=True)
+    df.set_index('utc', inplace=True)
+    df.sort_index(inplace=True)
+    df.reset_index(inplace=True)
     return df
 
 
@@ -147,12 +153,17 @@ def summarise_sciobs(sci_sources, sci_lines, df):
     from numpy import timedelta64
 
     # print("Summarizing scan duration by:", sci_sources, sci_lines)
-    dfs = df[(df.Source.isin(sci_sources)) & (df.Line.isin(sci_lines))]
-    dfs = dfs.groupby(["Source", "Line"])[["Scan duration"]].sum()
-    dfs.sort_values("Scan duration", ascending=False, inplace=True)
-    dfs["Duration [min]"] = (dfs["Scan duration"] /
+    on_types = ['ONOFF', 'OTF']
+    dfs = pd.DataFrame(df[df.source.isin(sci_sources)
+                          & df.line.isin(sci_lines)
+                          & df.scan_type.isin(on_types)
+                          ]
+                       )
+    dfs = dfs.groupby(['source', 'line'])[['scan_duration']].sum()
+    dfs.sort_values('scan_duration', ascending=False, inplace=True)
+    dfs['Duration [min]'] = (dfs['scan_duration'] /
                              timedelta64(1, 'm')).round(1)
-    return dfs[["Duration [min]"]]
+    return dfs[['Duration [min]']]
 
 
 def main():
@@ -164,28 +175,16 @@ def main():
 
 
 if __name__ == "__main__":
+    # import pandas as pd
     sci_sources, sci_lines, df, dfs = main()
     print(dfs)
-    df.set_index("UTC", inplace=True)
-    df.sort_index(inplace=True)
     # date = str(pd.datetime.utcnow().date())
-    # today = pd.DataFrame(df[df.Source.isin(sci_sources) &
-    #                         df.Line.isin(sci_lines)][date])
+    # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
+    #                      & (df.Line.isin(sci_lines))][date])
     # print("\n", date, today["Scan duration"].sum())
     # print('Observed: ' + date)
     # print(today.Source.value_counts())
-    sci_types = ['CAL', 'ONOFF', 'OTF', 'RASTER']
-    sci = pd.DataFrame(df[df.Source.isin(sci_sources) &
-                          df.Line.isin(sci_lines) &
-                          df['Scan type'].isin(sci_types)])
-    print(sci.groupby(sci.index.date).Source.unique())
-
-    # May need to get rid of any cancelled scans
-    sci.to_csv('Betelgeuse_scans.dat', index=False,
-               columns=['Scan'], header=False)
-
-    sci['date'] = sci.index.date.astype('str')
-    for date in sci.date.unique():
-        # print(date)
-        sci[date].to_csv('Betelgeuse_' + str(date) + '_scans.dat',
-                         index=False, columns=['Scan'], header=False)
+    df.set_index('uts', inplace=True)
+    sci = pd.DataFrame(df[(df.source.isin(sci_sources))
+                          & (df.line.isin(sci_lines))])
+    print(sci.groupby(sci.index.date).source.unique())
