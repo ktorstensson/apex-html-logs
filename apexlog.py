@@ -179,6 +179,9 @@ def parse_inputs():
 
 def main():
     catalogs, obslogs = parse_inputs()
+    if (catalogs is None) & (obslogs is None):
+        print('\033[1;32mDefaulting to APEX account:',
+              '~/' + getuser() + '.[cat/lin] and ~/obslogs/\033[0m')
     sci_sources = read_sourcecat(catalogs)
     sci_lines = read_linecat(catalogs)
     df = read_obslogs(obslogs)
