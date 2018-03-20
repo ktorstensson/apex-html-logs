@@ -7,6 +7,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import with_statement
+import argparse
 import numpy as np
 import pandas as pd
 import re
@@ -32,6 +33,8 @@ def read_sourcecat(cat=None):
     sci_sources = []
     if cat is None:
         cat = expanduser('~/') + getuser() + '.cat'
+    elif ~cat.endswith('.cat'):
+        cat = cat + '.cat'
     # print("Reading science sources from:", cat)
     with open(cat) as f:
         s = f.readlines()
@@ -58,6 +61,8 @@ def read_linecat(cat=None):
     sci_freqs = []
     if cat is None:
         cat = expanduser('~/') + getuser() + '.lin'
+    elif ~cat.endswith('.lin'):
+        cat = cat + '.lin'
     # print("Reading science lines from:", cat)
     with open(cat) as f:
         s = f.readlines()
@@ -160,24 +165,38 @@ def summarise_sciobs(sci_sources, sci_lines, df):
     return dfs[['Duration [min]']]
 
 
+def parse_inputs():
+    '''Parse inputs, absolute or optinal'''
+    parser = argparse.ArgumentParser(
+        description='Summarises APEX obslogs, defaults to APEX account')
+    parser.add_argument('-c', '--catalogs', type=str,
+                        help='Location/basename of source and line catalogs')
+    parser.add_argument('-o', '--obslogs', type=str,
+                        help='Location of html obslogs')
+    args = parser.parse_args()
+    return args.catalogs, args.obslogs
+
+
 def main():
-    sci_sources = read_sourcecat()
-    sci_lines = read_linecat()
-    df = read_obslogs()
+    catalogs, obslogs = parse_inputs()
+    sci_sources = read_sourcecat(catalogs)
+    sci_lines = read_linecat(catalogs)
+    df = read_obslogs(obslogs)
     dfs = summarise_sciobs(sci_sources, sci_lines, df)
     return sci_sources, sci_lines, df, dfs
 
 
 if __name__ == '__main__':
+    # catalogs, obslogs = parse_inputs()
     sci_sources, sci_lines, df, dfs = main()
     print(dfs)
-    # date = str(pd.datetime.utcnow().date())
-    # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
-    #                      & (df.Line.isin(sci_lines))][date])
-    # print("\n", date, today["Scan duration"].sum())
-    # print('Observed: ' + date)
-    # print(today.Source.value_counts())
-    df.set_index('uts', inplace=True)
-    sci = pd.DataFrame(df[(df.source.isin(sci_sources))
-                          & (df.line.isin(sci_lines))])
-    print(sci.groupby(sci.index.date).source.unique())
+    # # date = str(pd.datetime.utcnow().date())
+    # # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
+    # #                      & (df.Line.isin(sci_lines))][date])
+    # # print("\n", date, today["Scan duration"].sum())
+    # # print('Observed: ' + date)
+    # # print(today.Source.value_counts())
+    # df.set_index('uts', inplace=True)
+    # sci = pd.DataFrame(df[(df.source.isin(sci_sources))
+    #                       & (df.line.isin(sci_lines))])
+    # print(sci.groupby(sci.index.date).source.unique())
