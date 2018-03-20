@@ -199,7 +199,7 @@ def main():
     dfs = summarise_sciobs(sci_sources, sci_lines, df)
     # print(dfs.sort_values(by='Duration [min]', ascending=False))
     print(dfs)
-    fig = plot_dfs(dfs)
+    plot_dfs(dfs)
     return sci_sources, sci_lines, df, dfs
 
 
