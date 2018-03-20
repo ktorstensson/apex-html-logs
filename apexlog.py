@@ -1,7 +1,18 @@
-from __future__ import (absolute_import, division, with_statement,
-                        print_function, unicode_literals)
+#!/usr/bin/env python
+# coding: utf-8
+''' plotAmpPhase.py
+'''
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import with_statement
+import numpy as np
 import pandas as pd
 import re
+from os.path import expanduser
+from getpass import getuser
+from glob import glob
 
 
 def read_sourcecat(cat=None):
@@ -19,16 +30,11 @@ def read_sourcecat(cat=None):
     '''
 
     sci_sources = []
-
     if cat is None:
-        from os.path import expanduser
-        from getpass import getuser
         cat = expanduser('~/') + getuser() + '.cat'
-
     # print("Reading science sources from:", cat)
     with open(cat) as f:
         s = f.readlines()
-
     for line in s:
         if ((line[0] != '!') & (line[0] != '\n')):
             sci_sources.append(line.split()[0])
@@ -50,16 +56,11 @@ def read_linecat(cat=None):
     '''
     sci_lines = []
     sci_freqs = []
-
     if cat is None:
-        from os.path import expanduser
-        from getpass import getuser
         cat = expanduser('~/') + getuser() + '.lin'
-
     # print("Reading science lines from:", cat)
     with open(cat) as f:
         s = f.readlines()
-
     for line in s:
         if ((line[0] != '!') & (line[0] != '\n')):
             sci_lines.append(line.split()[0])
@@ -82,7 +83,6 @@ def read_one(filename):
         The obslog data
     '''
 
-    import pandas as pd
     df = pd.read_html(filename, header=0)[0]
     # df.set_index("Scan")
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
@@ -108,10 +108,6 @@ def read_obslogs(dir=None):
     df : pandas.DataFrame
         The obslog data
     '''
-
-    import pandas as pd
-    from os.path import expanduser
-    from glob import glob
 
     if dir is None:
         dir = expanduser('~/obslogs/')
@@ -150,8 +146,6 @@ def summarise_sciobs(sci_sources, sci_lines, df):
         Summary of scan duration [min] for sources/lines
     '''
 
-    from numpy import timedelta64
-
     # print("Summarizing scan duration by:", sci_sources, sci_lines)
     on_types = ['ONOFF', 'OTF']
     dfs = pd.DataFrame(df[df.source.isin(sci_sources)
@@ -162,7 +156,7 @@ def summarise_sciobs(sci_sources, sci_lines, df):
     dfs = dfs.groupby(['source', 'line'])[['scan_duration']].sum()
     dfs.sort_values('scan_duration', ascending=False, inplace=True)
     dfs['Duration [min]'] = (dfs['scan_duration'] /
-                             timedelta64(1, 'm')).round(1)
+                             np.timedelta64(1, 'm')).round(1)
     return dfs[['Duration [min]']]
 
 
@@ -175,7 +169,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # import pandas as pd
     sci_sources, sci_lines, df, dfs = main()
     print(dfs)
     # date = str(pd.datetime.utcnow().date())
