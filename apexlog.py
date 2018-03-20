@@ -192,7 +192,6 @@ def main():
 if __name__ == '__main__':
     sci_sources, sci_lines, df, dfs = main()
     print(dfs)
-    print(df.columns)
     # # date = str(pd.datetime.utcnow().date())
     # # today = pd.DataFrame(df[(df.Source.isin(sci_sources))
     # #                      & (df.Line.isin(sci_lines))][date])
