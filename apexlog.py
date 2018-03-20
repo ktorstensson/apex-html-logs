@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-''' plotAmpPhase.py
+''' apexlog.py
 '''
 from __future__ import absolute_import
 from __future__ import division
@@ -166,7 +166,7 @@ def summarise_sciobs(sci_sources, sci_lines, df):
 
 
 def parse_inputs():
-    '''Parse inputs, absolute or optinal'''
+    '''Parse optinal catalogs and obslogs dir'''
     parser = argparse.ArgumentParser(
         description='Summarises APEX obslogs, defaults to APEX account')
     parser.add_argument('-c', '--catalogs', type=str,
@@ -190,7 +190,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # catalogs, obslogs = parse_inputs()
     sci_sources, sci_lines, df, dfs = main()
     print(dfs)
     # # date = str(pd.datetime.utcnow().date())
