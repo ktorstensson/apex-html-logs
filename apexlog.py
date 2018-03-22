@@ -35,8 +35,7 @@ def read_sourcecat(cat=None):
     # print(cat)
     if cat is None:
         cat = expanduser('~/') + getuser() + '.cat'
-    elif ~cat.endswith('.cat'):
-        # print('why?? it should not go in here...')
+    elif not cat.endswith('.cat'):
         cat = cat + '.cat'
     # print("Reading science sources from:", cat)
     with open(cat) as f:
@@ -64,7 +63,7 @@ def read_linecat(cat=None):
     sci_freqs = []
     if cat is None:
         cat = expanduser('~/') + getuser() + '.lin'
-    elif ~cat.endswith('.lin'):
+    elif not cat.endswith('.lin'):
         cat = cat + '.lin'
     # print("Reading science lines from:", cat)
     with open(cat) as f:
