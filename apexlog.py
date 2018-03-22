@@ -32,9 +32,11 @@ def read_sourcecat(cat=None):
     '''
 
     sci_sources = []
+    # print(cat)
     if cat is None:
         cat = expanduser('~/') + getuser() + '.cat'
     elif ~cat.endswith('.cat'):
+        # print('why?? it should not go in here...')
         cat = cat + '.cat'
     # print("Reading science sources from:", cat)
     with open(cat) as f:
@@ -93,6 +95,12 @@ def read_one(filename):
     # df.set_index("Scan")
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
     df['Scan duration'] = pd.to_timedelta(df['Scan duration'], unit='s')
+    # 'ZENITH', 'PARK'
+    # print(df.columns)
+    df.drop(df[(df.Source == 'PARK') | (df.Source == 'ZENITH')].index,
+            inplace=True)
+    # print(df[['mm pwv']])
+    df['mm PWV'] = df[['mm PWV']].apply(pd.to_numeric)
     return df
 
 
@@ -179,7 +187,7 @@ def parse_inputs():
 
 
 def plot_dfs(dfs):
-    dfs[['Duration [min]']].plot.barh(zorder=2, legend=False)
+    dfs[['Duration [min]']].iloc[::-1].plot.barh(zorder=2, legend=False)
     plt.grid(zorder=0)
     plt.title('Sum of "ON" science source/line scan duration')
     plt.xlabel('Duration [min]')
