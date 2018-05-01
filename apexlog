@@ -103,7 +103,7 @@ def read_one_log(filename):
 
 
 def get_line_name(string):
-    '''Get first white spaced deliminated part of string'''
+    '''Get first white spaced delimited part of string'''
     return string.split()[0]
 
 
@@ -147,7 +147,7 @@ def summarise_sciobs(sci_sources, sci_lines, df):
     sci_sources : list
         List of science sources
     sci_lines : list/dict
-        List or dicttionary of science lines
+        List or dictionary of science lines
     df : pandas.DataFrame
         The obslog data
 
@@ -226,4 +226,5 @@ if __name__ == '__main__':
     # print(sci.groupby(sci.index.date).source.unique())
 
     # --- Example 3: Running script locally
-    # apexlog -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016 -o ~/APEX/projects/JellyFish/obslogs/
+    # apexlog -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016
+    # -o ~/APEX/projects/JellyFish/obslogs/
