@@ -38,11 +38,11 @@ def read_sourcecat(cat=None):
     elif not cat.endswith('.cat'):
         cat = cat + '.cat'
 
-    print("Reading science sources from:", cat)
+    print('Reading science sources from:', cat)
     with open(cat) as f:
         s = f.readlines()
     for line in s:
-        if ((line[0] != '!') & (line[0] != '\n')):
+        if ((line[0] != '!') & (line[0] != '\n') & (line[0] != ' ')):
             sci_sources.append(line.split()[0])
     return sci_sources
 
@@ -67,11 +67,11 @@ def read_linecat(cat=None):
     elif not cat.endswith('.lin'):
         cat = cat + '.lin'
 
-    print("Reading science lines from:", cat)
+    print('Reading science lines from:', cat)
     with open(cat) as f:
         s = f.readlines()
     for line in s:
-        if ((line[0] != '!') & (line[0] != '\n')):
+        if ((line[0] != '!') & (line[0] != '\n') & (line[0] != ' ')):
             sci_lines.append(line.split()[0])
             sci_freqs.append(float(line.split()[1]))
     sci_lines = dict(zip(sci_lines, sci_freqs))
@@ -92,7 +92,7 @@ def read_one_log(filename):
         The obslog data
     '''
 
-    print("Reading obslog:", filename)
+    print('Reading obslog:', filename)
     df = pd.read_html(filename, header=0)[0]
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
     df['Scan duration'] = pd.to_timedelta(df['Scan duration'], unit='s')
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # date = '2016-12-10'
     # today = pd.DataFrame(df[(df.source.isin(sci_sources))
     #                         & (df.line.isin(sci_lines))][date])
-    # print("\n", date, today["scan_duration"].sum())
+    # print('\n', date, today['scan_duration'].sum())
     # print('Observed: ' + date)
     # print(today.source.value_counts())
 
