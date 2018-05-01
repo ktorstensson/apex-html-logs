@@ -214,7 +214,7 @@ def main():
 if __name__ == '__main__':
     sci_sources, sci_lines, df, dfs = main()
 
-    # # Example 1: List science source scans today and sum of on time
+    # --- Example 1: List science source scans today and sum of on time
     # df.set_index('utc', inplace=True)
     # date = str(pd.datetime.utcnow().date())
     # date = '2016-12-10'
@@ -224,11 +224,11 @@ if __name__ == '__main__':
     # print('Observed: ' + date)
     # print(today.source.value_counts())
 
-    # # Example 2: List which dates sources have been observed
+    # --- Example 2: List which dates sources have been observed
     # df.set_index('utc', inplace=True)
     # sci = pd.DataFrame(df[(df.source.isin(sci_sources))
     #                       & (df.line.isin(sci_lines))])
     # print(sci.groupby(sci.index.date).source.unique())
 
-    # python apexlog.py -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016
-    # -o ~/APEX/projects/JellyFish/obslogs/
+    # --- Example 3: Running script locally
+    # apexlog -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016 -o ~/APEX/projects/JellyFish/obslogs/
