@@ -33,12 +33,12 @@ def read_sourcecat(cat=None):
     '''
 
     sci_sources = []
-    # print(cat)
     if cat is None:
         cat = expanduser('~/') + getuser() + '.cat'
     elif not cat.endswith('.cat'):
         cat = cat + '.cat'
-    # print("Reading science sources from:", cat)
+
+    print("Reading science sources from:", cat)
     with open(cat) as f:
         s = f.readlines()
     for line in s:
@@ -66,7 +66,8 @@ def read_linecat(cat=None):
         cat = expanduser('~/') + getuser() + '.lin'
     elif not cat.endswith('.lin'):
         cat = cat + '.lin'
-    # print("Reading science lines from:", cat)
+
+    print("Reading science lines from:", cat)
     with open(cat) as f:
         s = f.readlines()
     for line in s:
@@ -91,15 +92,12 @@ def read_one_log(filename):
         The obslog data
     '''
 
+    print("Reading obslog:", filename)
     df = pd.read_html(filename, header=0)[0]
-    # df.set_index("Scan")
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
     df['Scan duration'] = pd.to_timedelta(df['Scan duration'], unit='s')
-    # 'ZENITH', 'PARK'
-    # print(df.columns)
     df.drop(df[(df.Source == 'PARK') | (df.Source == 'ZENITH')].index,
             inplace=True)
-    # print(df[['mm pwv']])
     df['mm PWV'] = df[['mm PWV']].apply(pd.to_numeric)
     return df
 
@@ -125,10 +123,9 @@ def read_obslogs(dir=None):
 
     if dir is None:
         dir = expanduser('~/obslogs/')
-
     logs = glob(dir + '*.html')
 
-    # print("Reading obslogs:", logs)
+    print('')
     df = read_one_log(logs[0])
     for log in logs[1:]:
         df = pd.concat([df, read_one_log(log)], axis=0)
@@ -160,7 +157,7 @@ def summarise_sciobs(sci_sources, sci_lines, df):
         Summary of scan duration [min] for sources/lines
     '''
 
-    # print("Summarizing scan duration by:", sci_sources, sci_lines)
+    print('\nSummarising scan duration by science sources/lines:')
     on_types = ['ONOFF', 'OTF']
     dfs = pd.DataFrame(df[df.source.isin(sci_sources)
                           & df.line.isin(sci_lines)
@@ -168,14 +165,13 @@ def summarise_sciobs(sci_sources, sci_lines, df):
                           ]
                        )
     dfs = dfs.groupby(['source', 'line'])[['scan_duration']].sum()
-    # dfs.sort_values('scan_duration', ascending=False, inplace=True)
     dfs['Duration [min]'] = (dfs['scan_duration'] /
                              np.timedelta64(1, 'm')).round(1)
     return dfs[['Duration [min]']]
 
 
 def parse_inputs():
-    '''Parse optinal catalogs and obslogs dir'''
+    '''Parse optional catalogs and obslogs dir'''
     parser = argparse.ArgumentParser(
         description='Summarises APEX obslogs, defaults to APEX account')
     parser.add_argument('-c', '--catalogs', type=str,
@@ -205,7 +201,6 @@ def main():
     sci_lines = read_linecat(catalogs)
     df = read_obslogs(obslogs)
     dfs = summarise_sciobs(sci_sources, sci_lines, df)
-    # print(dfs.sort_values(by='Duration [min]', ascending=False))
     print(dfs)
     plot_dfs(dfs)
     return sci_sources, sci_lines, df, dfs
