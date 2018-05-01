@@ -228,3 +228,6 @@ if __name__ == '__main__':
     # sci = pd.DataFrame(df[(df.source.isin(sci_sources))
     #                       & (df.line.isin(sci_lines))])
     # print(sci.groupby(sci.index.date).source.unique())
+
+    # python apexlog.py -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016
+    # -o ~/APEX/projects/JellyFish/obslogs/
