@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 from __future__ import with_statement
 import argparse
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 import pandas as pd
 import re
@@ -187,27 +188,78 @@ def plot_dfs(dfs):
     plt.grid(zorder=0)
     plt.title('Sum of "ON" science source/line scan duration')
     plt.xlabel('Duration [min]')
-    plt.savefig('apexlog.png', bbox_inches='tight')
+    plt.savefig('dfs.png', bbox_inches='tight')
     print('\nCreated plot: ./apexlog.png')
     return plt.gcf()
 
 
+def plot_apexlog(sci_sources, sci_lines, df, dfs, eso_id):
+    a = 2
+    on_types = ['ONOFF', 'OTF']
+    science = pd.DataFrame(df[df.source.isin(sci_sources)
+                              & df.line.isin(sci_lines)
+                              & df.scan_type.isin(on_types)
+                              ]
+                           )
+    pwv = science.groupby(['source', 'line']).mm_pwv.describe()
+    pwv = pwv[['mean', 'std']].round(2)
+
+    fig = plt.figure(1, figsize=(a * 6.4, a * 4.8))
+    gs = gridspec.GridSpec(2, 4, height_ratios=[3, 1],
+                           width_ratios=[0.25, 0.25, 0.25, 0.25])
+
+    gs.update(left=0.1, right=0.95, bottom=0.08,
+              top=0.90, wspace=0., hspace=0.2)
+
+    now = pd.datetime.utcnow()
+    header = eso_id + ' by ' + now.strftime('%Y-%m-%d')
+    fig.text(0.5, 0.93, header,
+             ha='center', va='bottom', fontsize=12, weight='bold')
+    ax1 = plt.subplot(gs[0, :])
+    ax2 = plt.subplot(gs[1, :-1])
+    ax3 = plt.subplot(gs[1, -1], sharey=ax2)
+    dfs[['Duration [min]']].iloc[::-1].plot.barh(zorder=2, legend=False,
+                                                 ax=ax1)
+    df.loc[df.mm_pwv <= 0, 'mm_pwv'] = np.nan
+    df.set_index('utc', inplace=True)
+    df.mm_pwv.plot(style='o', mfc='none', mew=1, ax=ax2)
+    df.reset_index(inplace=True)
+    df.mm_pwv.plot.hist(bins=np.arange(0, df.mm_pwv.max(), 0.01),
+                        cumulative=True, density=True,
+                        orientation='horizontal')
+
+    ax1.set_title('Sum of "ON" source scan duration by science source/line')
+    ax1.set_xlabel('Duration [min]')
+    ax1.set_ylabel('')
+    ax2.set_ylabel('PWV [mm]')
+    ax2.set_xlabel('')
+    for ax in [ax1, ax2, ax3]:
+        ax.grid()  # zorder=0
+    return fig
+
+
 def main():
+    plt.close('all')
     catalogs, obslogs = parse_inputs()
     if (catalogs is None) & (obslogs is None):
+        eso_id = getuser()
         print('\033[1;32mDefaulting to APEX account:',
               '~/' + getuser() + '.[cat/lin] and ~/obslogs/\033[0m')
+    else:
+        eso_id = catalogs.split('/')[-1]
     sci_sources = read_sourcecat(catalogs)
     sci_lines = read_linecat(catalogs)
     df = read_obslogs(obslogs)
     dfs = summarise_sciobs(sci_sources, sci_lines, df)
     print(dfs)
-    plot_dfs(dfs)
-    return sci_sources, sci_lines, df, dfs
+    # plot_dfs(dfs)
+    fig = plot_apexlog(sci_sources, sci_lines, df, dfs, eso_id.upper())
+    fig.savefig('apexlog.png', bbox_inches='tight', dpi=120)
+    return sci_sources, sci_lines, df, dfs, fig
 
 
 if __name__ == '__main__':
-    sci_sources, sci_lines, df, dfs = main()
+    sci_sources, sci_lines, df, dfs, fig = main()
 
     # --- Example 1: List science source scans today and sum of on time
     # df.set_index('utc', inplace=True)
