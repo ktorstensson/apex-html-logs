@@ -1,5 +1,5 @@
 # apexlog.py
-Python script to summarize APEX html logs. At APEX the script can be used on the observing account without any input, it will default to the "standard" catalogs and obslogs of the project.
+Python script to summarize APEX html logs. At APEX the script can be used on the observing account without any input ```> apexlog```, it will default to the "standard" catalogs and obslogs of the project.
 
 The script reads the catalogs (.cat/.lin) to define science sources/lines. The obslogs are read in to a pandas.DataFrame for easy procesing/summarising of observed scans. Use ```ipython``` to create more summary statistics.
 
