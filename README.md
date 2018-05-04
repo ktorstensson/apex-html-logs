@@ -34,8 +34,8 @@ JO204_C CO_JO204              387.8
 df.set_index('utc', inplace=True)
 date = str(pd.datetime.utcnow().date())
 date = '2016-12-10'
-today = pd.DataFrame(df[(df.source.isin(sci_sources))
-                        & (df.line.isin(sci_lines))][date])
+today = pd.DataFrame(df[(df.source.isin(sci_sources)) &
+                        (df.line.isin(sci_lines))][date])
 print('\n', date, today['scan_duration'].sum())
 print('Observed: ' + date)
 print(today.source.value_counts())
@@ -44,7 +44,7 @@ print(today.source.value_counts())
 ###  List which dates sources have been observed
 ```python
 df.set_index('utc', inplace=True)
-sci = pd.DataFrame(df[(df.source.isin(sci_sources))
-                      & (df.line.isin(sci_lines))])
+sci = pd.DataFrame(df[(df.source.isin(sci_sources)) &
+                      (df.line.isin(sci_lines))])
 print(sci.groupby(sci.index.date).source.unique())
 ```
