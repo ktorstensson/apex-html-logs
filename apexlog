@@ -96,6 +96,8 @@ def read_one_log(filename):
     print('Reading obslog:', filename)
     df = pd.read_html(filename, header=0)[0]
     df['UTC'] = pd.to_datetime(df.UTC, format='%Y-%m-%dU%H:%M:%S')
+    cancelled = df[df['Scan duration'] == -999]
+    df.loc[cancelled.index, 'Scan duration'] = 0
     df['Scan duration'] = pd.to_timedelta(df['Scan duration'], unit='s')
     df.drop(df[(df.Source == 'PARK') | (df.Source == 'ZENITH')].index,
             inplace=True)
@@ -234,7 +236,7 @@ def plot_apexlog(sci_sources, sci_lines, df, dfs, eso_id):
     ax2.set_ylabel('PWV [mm]')
     ax2.set_xlabel('')
     for ax in [ax1, ax2, ax3]:
-        ax.grid()  # zorder=0
+        ax.grid()
     return fig
 
 
@@ -255,28 +257,9 @@ def main():
     # plot_dfs(dfs)
     fig = plot_apexlog(sci_sources, sci_lines, df, dfs, eso_id.upper())
     fig.savefig('apexlog.png', bbox_inches='tight', dpi=120)
+    df.to_csv('apexlog.csv')
     return sci_sources, sci_lines, df, dfs, fig
 
 
 if __name__ == '__main__':
     sci_sources, sci_lines, df, dfs, fig = main()
-
-    # --- Example 1: List science source scans today and sum of on time
-    # df.set_index('utc', inplace=True)
-    # date = str(pd.datetime.utcnow().date())
-    # date = '2016-12-10'
-    # today = pd.DataFrame(df[(df.source.isin(sci_sources))
-    #                         & (df.line.isin(sci_lines))][date])
-    # print('\n', date, today['scan_duration'].sum())
-    # print('Observed: ' + date)
-    # print(today.source.value_counts())
-
-    # --- Example 2: List which dates sources have been observed
-    # df.set_index('utc', inplace=True)
-    # sci = pd.DataFrame(df[(df.source.isin(sci_sources))
-    #                       & (df.line.isin(sci_lines))])
-    # print(sci.groupby(sci.index.date).source.unique())
-
-    # --- Example 3: Running script locally
-    # apexlog -c ~/APEX/projects/JellyFish/e-098.b-0657a-2016
-    # -o ~/APEX/projects/JellyFish/obslogs/
