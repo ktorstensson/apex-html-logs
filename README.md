@@ -1,7 +1,7 @@
 # apex-html-logs.py
 This is the script which is deployed at APEX in ```/homes/software/MODULES/apex-html-logs/```.
 
-Usage on the observing account: ```sumlogs.py [-s CenA]```
+**Usage on the observing account:** ```sumlogs.py [-s CenA]```
 
 
 ## apexlog.py
